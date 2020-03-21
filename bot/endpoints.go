@@ -48,8 +48,8 @@ func (ef *endpointsFactory) AllCases(b *tb.Bot) func(c *tb.Callback){
 			fmt.Print(error.Error())
 		}else{
 			b.Edit(c.Message,fmt.Sprintf("Все случаи: %v \nСмертей: %v \nВыздоровел: %v",strconv.Itoa(cas.Cases),strconv.Itoa(cas.Deaths),strconv.Itoa(cas.Recovered)))
-			b.EditReplyMarkup(c.Message,&tb.ReplyMarkup{InlineKeyboard:inlineKeys})g
 		}
+		b.EditReplyMarkup(c.Message,&tb.ReplyMarkup{InlineKeyboard:inlineKeys})
 	}
 }
 
