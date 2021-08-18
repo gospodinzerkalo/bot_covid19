@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/urfave/cli/v2"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
@@ -8,6 +9,11 @@ import (
 
 	"time"
 	"github.com/gospodinzerkalo/bot_covid19/bot"
+	"github.com/joho/godotenv"
+)
+
+var (
+	token = ""
 )
 
 
@@ -25,10 +31,15 @@ func main() {
 
 }
 
+func parseEnv() {
+	godotenv.Overload(".env")
+	token = os.Getenv("TG_TOKEN")
+}
 
 func StartBot(d *cli.Context) error {
+	parseEnv()
 	b, err := tb.NewBot(tb.Settings{
-		Token:  "731713099:AAHjpa_A8Ewv6CURNqfVqfF7AZ4eVKfwqhM",
+		Token:  token,
 		URL:    "",
 		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
 	})
@@ -43,6 +54,7 @@ func StartBot(d *cli.Context) error {
 	b.Handle(&bot.KeyAll,end.AllCases(b))
 	b.Handle(&bot.KeyKz,end.CheckKz(b))
 	b.Handle(&bot.KeyByCountry,end.FindByCountry(b))
+	fmt.Println("BOT LAUNCHED!!!")
 	b.Start()
 	return nil
 }

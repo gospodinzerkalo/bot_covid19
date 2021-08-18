@@ -9,6 +9,10 @@ import (
 	"sync"
 )
 
+const (
+	BASEURL = "https://coronavirus-19-api.herokuapp.com"
+)
+
 var (
 	KeyAll = tb.InlineButton{Unique:"i1", Text:"Все случаи",}
 	KeyByCountry = tb.InlineButton{Unique:"i2",Text:"Выбрать страну"}
@@ -18,7 +22,6 @@ var (
 		[]tb.InlineButton{KeyByCountry},
 	}
 	country = ""
-
 )
 
 func NewEndpointsFactory() *endpointsFactory {
@@ -34,10 +37,9 @@ func (ef *endpointsFactory) Start(b *tb.Bot) func (m *tb.Message){
 	}
 }
 
-
 func (ef *endpointsFactory) AllCases(b *tb.Bot) func(c *tb.Callback){
 	return func(c *tb.Callback) {
-		re,err:= http.Get("https://coronavirus-19-api.herokuapp.com/all")
+		re,err:= http.Get(fmt.Sprintf("%s/all", BASEURL))
 		if err!=nil {
 			fmt.Print(err.Error())
 		}
@@ -55,7 +57,7 @@ func (ef *endpointsFactory) AllCases(b *tb.Bot) func(c *tb.Callback){
 
 func (ef *endpointsFactory) CheckKz(b *tb.Bot) func(c *tb.Callback){
 	return func(c *tb.Callback) {
-		re,err:= http.Get("https://coronavirus-19-api.herokuapp.com/countries/Kazakhstan")
+		re,err:= http.Get(fmt.Sprintf("%s/countries/Kazakhstan", BASEURL))
 		if err!=nil {
 			fmt.Print(err.Error())
 		}
@@ -78,10 +80,9 @@ func (ef *endpointsFactory) FindByCountry(b *tb.Bot) func(c *tb.Callback){
 		var wg sync.WaitGroup
 		wg.Add(1)
 		GetCountry(ef,b,c,wg)
-
-
 	}
 }
+
 func GetCountry(ef *endpointsFactory,b *tb.Bot,c *tb.Callback, wg sync.WaitGroup) {
 	defer wg.Done()
 	b.Send(c.Sender,"Напишите название страны (На английском и без ошибок)")
@@ -92,9 +93,8 @@ func GetCountry(ef *endpointsFactory,b *tb.Bot,c *tb.Callback, wg sync.WaitGroup
 		})
 	}()
 	res := <-ch
-	re,err:= http.Get("https://coronavirus-19-api.herokuapp.com/countries/"+res)
+	re,err:= http.Get(fmt.Sprintf("%s/countries/%s", BASEURL, res))
 	if err!=nil {
-		fmt.Print(err.Error()+" 1111")
 		wg.Add(1)
 		GetCountry(ef,b,c,wg)
 	}else{
@@ -111,5 +111,4 @@ func GetCountry(ef *endpointsFactory,b *tb.Bot,c *tb.Callback, wg sync.WaitGroup
 			b.Send(c.Sender,fmt.Sprintf("Название страны: %v\nВсе случаи: %v\nСегодняшние происшествия: %v\nСмертей: %v\nСегодняшние смерти: %v\nВыздоровел: %v\nКритический: %v",cas.Country,cas.Cases,cas.TodayCases,cas.Deaths,cas.TodayDeaths,cas.Recovered,cas.Critical),&tb.ReplyMarkup{InlineKeyboard:inlineKeys})
 		}
 	}
-
 }
